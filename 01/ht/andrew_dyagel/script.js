@@ -153,13 +153,13 @@ function spiral (initialArray) {
  * @param {number} counter;
  */
 function moveToRightAndDown (array, resultArray, counter) {
-    for (var i = counter; i < array.length; i++) {
+    for (var i = counter; i < array.length - counter; i++) {
         if (i === 0) {
-            resultArray = resultArray.concat(array[i].slice(0, array[i].length - counter));
+            resultArray = resultArray.concat(array[i].slice(counter, array[i].length - counter));
         } else if (i === (array.length - (counter + 1))) {
             resultArray = resultArray.concat(array[array.length - (counter + 1)]
                 .slice(counter, array[array.length - (counter + 1)].length - counter).reverse());
-            resultArray = moveToLeftAndUp(array, resultArray, (counter + 1))
+            resultArray = moveToLeftAndUp(array, resultArray, ++counter)
         } else {
             resultArray.push(array[i][array[i].length - (counter + 1)]);
         }
@@ -171,7 +171,7 @@ function moveToLeftAndUp (array, resultArray, counter) {
     for (var i = array.length - (counter + 1); i >= counter; i--) {
         if (i === counter) {
             resultArray = resultArray.concat(array[i].slice(0, array[i].length - counter));
-            resultArray = moveToRightAndDown(array, resultArray, counter++)
+            resultArray = moveToRightAndDown(array, resultArray, ++counter)
         } else {
             resultArray.push(array[i][counter - 1]);
         }
@@ -179,11 +179,19 @@ function moveToLeftAndUp (array, resultArray, counter) {
     return resultArray;
 }
 
+// var testArray = [
+//     [1, 2, 3, 4, 5],
+//     [6, 7, 8, 9, 10],
+//     [11, 12, 13, 14, 15],
+//     [16, 17, 18, 19, 20]
+// ]; // [1,2,3,4,5,10,15,20,19,18,17,16,11,6,7,8,9,14,13,12]
+
 var testArray = [
     [1, 2, 3, 4, 5],
     [6, 7, 8, 9, 10],
     [11, 12, 13, 14, 15],
-    [16, 17, 18, 19, 20]
-]; // [1,2,3,4,5,10,15,20,19,18,17,16,11,6,7,8,9,14,13,12]
+    [16, 17, 18, 19, 20],
+    [21, 22, 23]
+]; // [1,2,3,4,5,10,15,20,23,22,21,16,11,6,7,8,9,14,19,18,17,12,13]
 
 var result = spiral(testArray);
