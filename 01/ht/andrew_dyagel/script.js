@@ -130,62 +130,6 @@ function arrayComparer (arrayA, arrayB) {
     return true;
 }
 
-// var a = { prop1: 1, list: [1, 2, 3], o: { x: {y: 2} } };
-// var b = { prop1: 1, list: [1, 2, 3], o: { x: {y: 2} } };
-// var a = 1;
-// var b = 2;
-// var result = isDeepEqual(a, b);
-
-/**
- * Принимает на вход двумерный массив и возвращает
- * одномерный массив с элементами расположенными
- * по спирали.
- * @param {Array} initialArray
- * @return {Array}
- */
-function spiral (initialArray) {
-    var resultArray = [];
-    return moveToRightAndDown(initialArray, resultArray, 0);
-}
-/**
- * @param {Array} array
- * @param {Array} resultArray
- * @param {number} counter;
- */
-function moveToRightAndDown (array, resultArray, counter) {
-    for (var i = counter; i < array.length - counter; i++) {
-        if (i === 0) {
-            resultArray = resultArray.concat(array[i].slice(counter, array[i].length - counter));
-        } else if (i === (array.length - (counter + 1))) {
-            resultArray = resultArray.concat(array[array.length - (counter + 1)]
-                .slice(counter, array[array.length - (counter + 1)].length - counter).reverse());
-            resultArray = moveToLeftAndUp(array, resultArray, ++counter)
-        } else {
-            resultArray.push(array[i][array[i].length - (counter + 1)]);
-        }
-    }
-    return resultArray;
-}
-
-function moveToLeftAndUp (array, resultArray, counter) {
-    for (var i = array.length - (counter + 1); i >= counter; i--) {
-        if (i === counter) {
-            resultArray = resultArray.concat(array[i].slice(0, array[i].length - counter));
-            resultArray = moveToRightAndDown(array, resultArray, ++counter)
-        } else {
-            resultArray.push(array[i][counter - 1]);
-        }
-    }
-    return resultArray;
-}
-
-// var testArray = [
-//     [1, 2, 3, 4, 5],
-//     [6, 7, 8, 9, 10],
-//     [11, 12, 13, 14, 15],
-//     [16, 17, 18, 19, 20]
-// ]; // [1,2,3,4,5,10,15,20,19,18,17,16,11,6,7,8,9,14,13,12]
-
 var testArray = [
     [1, 2, 3, 4, 5],
     [6, 7, 8, 9, 10],
@@ -195,3 +139,136 @@ var testArray = [
 ]; // [1,2,3,4,5,10,15,20,23,22,21,16,11,6,7,8,9,14,19,18,17,12,13]
 
 var result = spiral(testArray);
+
+/**
+ * Принимает на вход двумерный массив и возвращает
+ * одномерный массив с элементами расположенными
+ * по спирали.
+ * @param {Array} initialArray
+ * @return {Array}
+ */
+function spiral (initialArray) {
+    // Начальный индекс.
+    var index = 0;
+    var resultArray = [];
+
+    return moveToRightAndUp(index, initialArray, resultArray);
+}
+
+/**
+ * Добавляет элементы по направлению вправо и вверх.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @return {Array}
+ */
+function moveToRightAndUp (index, array, resultArray) {
+    // Номер круга.
+    var lap = 0;
+    index === 0 ? lap = 1 : lap = index + 1;
+
+    for (var i = index; i < array.length - index; i++) {
+        if (i === index) {
+            resultArray = pushStartElement(i, array, resultArray, false, lap);
+            resultArray = concatLowerRow(i, array, resultArray);
+            resultArray = pushEndElement(i, array, resultArray, false, lap);
+        } else if (i === (array.length - (index + 1))) {
+            resultArray = moveToLeftAndDown(i, array, resultArray, lap)
+        } else {
+            resultArray = pushEndElement(i, array, resultArray, false, lap);
+        }
+    }
+    return resultArray;
+}
+
+/**
+ * Добавляет элементы по направлению влево и вниз.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @param {number} lap Номер круга.
+ * @return {Array}
+ */
+function moveToLeftAndDown (index, array, resultArray, lap) {
+    for (var i = index; i >= array.length - index; i--) {
+        if (i === index) {
+            resultArray = pushStartElement(i, array, resultArray, true, lap);
+            resultArray = concatUpperReversedRow(i, array, resultArray);
+            resultArray = pushEndElement(i, array, resultArray, true, lap);
+        } else if (i === (array.length - index)) {
+            resultArray = moveToRightAndUp(i, array, resultArray);
+        } else {
+            resultArray = pushEndElement(i, array, resultArray, true, lap);
+        }
+    }
+    return resultArray;
+}
+
+/**
+ * Добавляет нижнюю строку текущего круга спирали.
+ * Не включает крайние элементы.
+ * @param {number} index Индекс текущей строки.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @return {Array}
+ */
+function concatLowerRow (index, array, resultArray) {
+    return resultArray = resultArray
+        .concat(
+            array[index]
+                .slice(
+                    index === 0 ? (index + 1) : index,
+                    array[index].length - (index + 1)));
+}
+
+/**
+ * Добавляет элементы верхней строки текущего круга спирали,
+ * отсортированные в обратном порядке.
+ * Не включает крайние элементы.
+ * @param {number} index Индекс текущей строки.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @return {Array}
+ */
+function concatUpperReversedRow (index, array, resultArray) {
+    return resultArray = resultArray.concat(
+        array[index]
+            .slice(array.length - index, array[index].length - (array.length - index))
+            .reverse());
+}
+
+/**
+ * Добавляет начальный элемент в зависимости
+ * от направления движения.
+ * @param {number} index Индекс текущей строки.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @param {boolean} isReversed Если движемся в обратном направлении то true.
+ * @param {number} lap Номер круга.
+ * @return {Array}
+ */
+function pushStartElement (index, array, resultArray, isReversed, lap) {
+    if (isReversed) {
+        resultArray.push(array[index][array[index].length - lap]);
+    } else {
+        resultArray.push(array[index][index === 0 ? 0 : (index - 1)]);
+    }
+    return resultArray;
+}
+
+/**
+ * Добавляет конечный элемент в зависимости
+ * от направления движения.
+ * @param {number} index Индекс текущей строки.
+ * @param {Array} array Коллекция элементов.
+ * @param {Array} resultArray Результирующая коллекция.
+ * @param {boolean} isReversed Если движемся в обратном направлении то true.
+ * @param {number} lap Номер круга.
+ * @return {Array}
+ */
+function pushEndElement (index, array, resultArray, isReversed, lap) {
+    if (isReversed) {
+        resultArray.push(array[index][lap - 1]);
+    } else {
+        resultArray.push(array[index][array[index].length - lap]);
+    }
+    return resultArray;
+}
